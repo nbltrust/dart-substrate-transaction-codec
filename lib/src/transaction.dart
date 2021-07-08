@@ -30,7 +30,7 @@ class PolkaTransaction extends DelegatingMap {
   }
 
   factory PolkaTransaction.deserialize(String payload) {
-    final request = SyncHttpClient.postUrl(Uri.http('localhost:3000', '/substrate/decode'));
+    final request = SyncHttpClient.postUrl(Uri.http('localhost:3578', '/substrate/decode'));
     request.headers.contentType = ContentType('application', 'json', charset: 'utf-8');
     request.write(json.encode({
       'signingPayload': '0x' + strip0x(payload),
