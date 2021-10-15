@@ -47,8 +47,7 @@ class PolkaTransaction extends DelegatingMap {
   }
 
   Uint8List hashToSign() {
-    final hash = Blake2bDigest(digestSize: 32).process(hex.decode(this.delegate['payload']));
-    print('${hex.encode(hash)}');
+    final hash = Blake2bDigest(digestSize: 32).process(hex.decode(this['payload']));
     return hash;
   }
 }
