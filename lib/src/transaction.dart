@@ -34,6 +34,7 @@ class PolkaTransaction extends DelegatingMap {
     request.headers.contentType = ContentType('application', 'json', charset: 'utf-8');
     request.write(json.encode({
       'signingPayload': '0x' + strip0x(payload),
+      'metadata': 14,
     }));
     request.headers.add(HttpHeaders.acceptHeader, 'application/json');
     request.headers.add(HttpHeaders.cacheControlHeader, 'no-cache');
