@@ -73,7 +73,7 @@ void main() {
     });
   });
 
-  test("publicKeyToAddress", () {
+  test("publicKeyToAddress y is odd", () {
     final addr = encodeAddress(hex.decode('4de38cd2ece2d02237534c8498610e78a4dc0db1a2c61abf1d642009636e6fbe'), 42);
     print(addr);
 
@@ -90,5 +90,13 @@ void main() {
     print(addr1);
 
     assert(addr1 == addr);
+  });
+
+  test("publicKeyToAddress y is even", () {
+    final addr = publicKeyToAddress('a282482642aaf42fb90219c3e01c9d7d2bfef54cad585ef836b38461db53d48d',
+        '2900e8b6cb54a6154e38d2863b08dd0a99f7b56da31fd4872d4f691cc05851b4', 42);
+    print(addr);
+
+    assert('5EVDFeaCN9b7zF6jx5GRTRg5mgvEqP7yHJoptuVXhWmRcBfF' == addr);
   });
 }

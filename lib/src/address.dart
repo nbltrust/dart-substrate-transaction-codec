@@ -76,7 +76,7 @@ Uint8List blake2AsU8a(Uint8List data, {int bitLength = 256}) {
 
 String publicKeyToAddress(String hexX, String hexY, [int ss58Format = Defaults.prefix]) {
   final y = BigInt.parse(hexY, radix: 16);
-  final compressedKey = (y < BigInt.zero ? [2] : [3]) + my_hexdecode(hexX);
+  final compressedKey = (y.isEven ? [2] : [3]) + my_hexdecode(hexX);
 
   // print('compressedKey: ${hex.encode(compressedKey)}');
 
