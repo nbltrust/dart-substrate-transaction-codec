@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:bs58/bs58.dart' show base58;
 import 'package:convert/convert.dart';
 import 'package:cryptography/cryptography.dart';
+import 'package:pointycastle/digests/blake2b.dart';
 
 class Defaults {
   static const allowedDecodedLengths = [1, 2, 4, 8, 32, 33];
@@ -29,8 +30,7 @@ Uint8List sshash(Uint8List input) {
 }
 
 String encodeAddress(Uint8List u8a, [int ss58Format = Defaults.prefix]) {
-  assert(ss58Format >= 0 && ss58Format <= 16383 && ![46, 47].contains(ss58Format),
-      'Out of range ss58Format specified');
+  assert(ss58Format >= 0 && ss58Format <= 16383 && ![46, 47].contains(ss58Format), 'Out of range ss58Format specified');
   assert(Defaults.allowedDecodedLengths.contains(u8a.length),
       "Expected a valid key to convert, with length ${Defaults.allowedDecodedLengths}");
 
@@ -69,8 +69,19 @@ String encodeAddress(Uint8List u8a, [int ss58Format = Defaults.prefix]) {
   return base58.encode(bytes);
 }
 
-String publicKeyToAddress(String hexX, String hexY, [int ss58Format = Defaults.prefix]) {
-  final plainKey = my_hexdecode(hexX) + my_hexdecode(hexY);
+Uint8List blake2AsU8a(Uint8List data, {int bitLength = 256}) {
+  final digestSize = (bitLength / 8).ceil();
+  return Blake2bDigest(digestSize: digestSize).process(data);
+}
 
-  return encodeAddress(plainKey, ss58Format);
+String publicKeyToAddress(String hexX, String hexY, [int ss58Format = Defaults.prefix]) {
+  final y = BigInt.parse(hexY, radix: 16);
+  final compressedKey = (y < BigInt.zero ? [2] : [3]) + my_hexdecode(hexX);
+
+  // print('compressedKey: ${hex.encode(compressedKey)}');
+
+  final publicKeyU8A = blake2AsU8a(Uint8List.fromList(compressedKey));
+  // print('publicKeyU8A: $publicKeyU8A');
+
+  return encodeAddress(publicKeyU8A, ss58Format);
 }

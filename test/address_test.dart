@@ -1,8 +1,8 @@
 library substrate_codec_test.address_test;
 
-import 'package:substrate_codec/substrate_codec.dart';
 import 'package:convert/convert.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:substrate_codec/substrate_codec.dart';
 
 const SUBKEY = [
   {
@@ -71,5 +71,24 @@ void main() {
 
       expect(addr, value["address"]);
     });
+  });
+
+  test("publicKeyToAddress", () {
+    final addr = encodeAddress(hex.decode('4de38cd2ece2d02237534c8498610e78a4dc0db1a2c61abf1d642009636e6fbe'), 42);
+    print(addr);
+
+    // print(Blake2bHash.hashWithDigestSize(512, Uint8List.fromList(utf8.encode('abc'))));
+    // // final Blake2b blake2b = Blake2b(digestLength: 64);
+    // // blake2b.update(Uint8List.fromList([10, 188]));
+    // // print(blake2b.digest());
+    // final digest = Blake2bDigest(digestSize: 64).process(Uint8List.fromList(utf8.encode('abc')));
+    // print(digest);
+    // new Digest("Blake2b")
+
+    final addr1 = publicKeyToAddress('5ed6d1440bb1c8c79ccfe315e511b8cb4c2af011169b34fa8205bb8d5af9c426',
+        '0d222860186356b67f194570b45af6e1e2de7842d9edbd061c4c78d76b360f49', 42);
+    print(addr1);
+
+    assert(addr1 == addr);
   });
 }
