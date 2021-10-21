@@ -1,7 +1,8 @@
 library substrate_codec_test.address_test;
 
+import 'package:convert/convert.dart';
 import 'package:substrate_codec/substrate_codec.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test("test deserialize tx", () {

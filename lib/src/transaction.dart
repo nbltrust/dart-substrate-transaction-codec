@@ -29,12 +29,13 @@ class PolkaTransaction extends DelegatingMap {
     // print(this.delegate);
   }
 
-  factory PolkaTransaction.deserialize(String payload) {
+  factory PolkaTransaction.deserialize(String payload, [String chain = 'Westend']) {
     final request = SyncHttpClient.postUrl(Uri.http('localhost:3578', '/substrate/decode'));
     request.headers.contentType = ContentType('application', 'json', charset: 'utf-8');
     request.write(json.encode({
       'signingPayload': '0x' + strip0x(payload),
       'metadata': 14,
+      'chain': chain,
     }));
     request.headers.add(HttpHeaders.acceptHeader, 'application/json');
     request.headers.add(HttpHeaders.cacheControlHeader, 'no-cache');
