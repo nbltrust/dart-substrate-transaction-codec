@@ -1,4 +1,4 @@
-library substrate_codec_test.address_test;
+library substrate_codec_test.transaction_test;
 
 import 'package:convert/convert.dart';
 import 'package:substrate_codec/substrate_codec.dart';
