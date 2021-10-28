@@ -1,12 +1,14 @@
 library substrate_codec.transaction;
 
+import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show ContentType, HttpHeaders;
+// import 'dart:io' show ContentType, HttpHeaders;
 import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:quiver/collection.dart';
 import 'package:pointycastle/digests/blake2b.dart';
-import 'package:sync_http/sync_http.dart';
+import 'package:http/http.dart' as http;
+// import 'package:sync_http/sync_http.dart';
 
 String strip0x(String hex) {
   if (hex.startsWith('0x')) return hex.substring(2);
@@ -29,18 +31,29 @@ class PolkaTransaction extends DelegatingMap {
     // print(this.delegate);
   }
 
-  factory PolkaTransaction.deserialize(String payload, [String chain = 'Westend']) {
-    final request = SyncHttpClient.postUrl(Uri.http('localhost:3578', '/substrate/decode'));
-    request.headers.contentType = ContentType('application', 'json', charset: 'utf-8');
-    request.write(json.encode({
-      'signingPayload': '0x' + strip0x(payload),
-      'metadata': 14,
-      'chain': chain,
-    }));
-    request.headers.add(HttpHeaders.acceptHeader, 'application/json');
-    request.headers.add(HttpHeaders.cacheControlHeader, 'no-cache');
+  static Future<PolkaTransaction> deserialize(String payload, [String chain = 'Westend']) async {
+    final response = await http.post(
+      'http://localhost:3578/substrate/decode',
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: json.encode({
+        'signingPayload': '0x' + strip0x(payload),
+        'metadata': 14,
+        'chain': chain,
+      }),
+    );
+    // final request = SyncHttpClient.postUrl(Uri.http('localhost:3578', '/substrate/decode'));
+    // request.headers.contentType = ContentType('application', 'json', charset: 'utf-8');
+    // request.write(json.encode({
+    //   'signingPayload': '0x' + strip0x(payload),
+    //   'metadata': 14,
+    //   'chain': chain,
+    // }));
+    // request.headers.add(HttpHeaders.acceptHeader, 'application/json');
+    // request.headers.add(HttpHeaders.cacheControlHeader, 'no-cache');
 
-    final response = request.close();
+    // final response = request.close();
     // print(response.body);
 
     PolkaTransaction tx = new PolkaTransaction(strip0x(payload), json.decode(response.body));
