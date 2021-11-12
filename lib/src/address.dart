@@ -5,6 +5,7 @@ import 'package:bs58/bs58.dart' show base58;
 import 'package:convert/convert.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:pointycastle/digests/blake2b.dart';
+import 'package:substrate_codec/substrate_codec.dart';
 
 class Defaults {
   static const allowedDecodedLengths = [1, 2, 4, 8, 32, 33];
@@ -84,4 +85,41 @@ String publicKeyToAddress(String hexX, String hexY, [int ss58Format = Defaults.p
   // print('publicKeyU8A: $publicKeyU8A');
 
   return encodeAddress(publicKeyU8A, ss58Format);
+}
+
+bool verifyAddress(String pubkey, String address, [int ss58Format = Defaults.prefix]) {
+  pubkey = strip0x(pubkey);
+
+  if (pubkey.length <= 64) {
+    try {
+      final publicKeyU8A = my_hexdecode(pubkey);
+      if (encodeAddress(publicKeyU8A, ss58Format) == address) return true;
+    } catch (e) {
+      //
+    }
+
+    try {
+      final compressedKey = [2] + my_hexdecode(pubkey);
+      final publicKeyU8A = blake2AsU8a(Uint8List.fromList(compressedKey));
+      if (encodeAddress(publicKeyU8A, ss58Format) == address) return true;
+    } catch (e) {
+      //
+    }
+
+    try {
+      final compressedKey = [3] + my_hexdecode(pubkey);
+      final publicKeyU8A = blake2AsU8a(Uint8List.fromList(compressedKey));
+      return encodeAddress(publicKeyU8A, ss58Format) == address;
+    } catch (e) {
+      //
+    }
+  } else {
+    try {
+      return publicKeyToAddress(pubkey.substring(0, 64), pubkey.substring(64), ss58Format) == address;
+    } catch (e) {
+      //
+    }
+  }
+
+  return false;
 }

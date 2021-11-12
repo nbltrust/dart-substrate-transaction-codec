@@ -8,12 +8,8 @@ import 'package:convert/convert.dart';
 import 'package:quiver/collection.dart';
 import 'package:pointycastle/digests/blake2b.dart';
 import 'package:http/http.dart' as http;
+import 'package:substrate_codec/substrate_codec.dart';
 // import 'package:sync_http/sync_http.dart';
-
-String strip0x(String hex) {
-  if (hex.startsWith('0x')) return hex.substring(2);
-  return hex;
-}
 
 class PolkaTransaction extends DelegatingMap {
   final delegate = new Map<String, dynamic>();

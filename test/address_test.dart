@@ -99,4 +99,12 @@ void main() {
 
     assert('5EVDFeaCN9b7zF6jx5GRTRg5mgvEqP7yHJoptuVXhWmRcBfF' == addr);
   });
+
+  test("verify address", () {
+    final flag = verifyAddress('879b61bf2d8df8f9fb1d9e47cf47cb076e4bb5b635dfba6d595264fcd9eee1e1',
+        '144od71wNviFuH7ai95DcJyG6BX6rggKVfPksfoR8nC4FMjS', 0);
+    print(flag);
+
+    assert(flag);
+  });
 }
