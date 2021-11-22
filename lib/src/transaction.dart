@@ -11,6 +11,33 @@ import 'package:http/http.dart' as http;
 import 'package:substrate_codec/substrate_codec.dart';
 // import 'package:sync_http/sync_http.dart';
 
+Map<String, dynamic> parseArgs(Map<String, dynamic> map, [Map<String, dynamic> tmp]) {
+  tmp = tmp ?? new Map();
+
+  final keys = map.keys;
+  for (final key in keys) {
+    final el = map[key];
+
+    if (key == 'args') {
+      tmp.addAll(parseArgs(map[key]));
+      continue;
+    } else if (key == 'dest') {
+      tmp[key] = el.values.first;
+      continue;
+    }
+
+    if (el is List) {
+      tmp[key] = parseArgs(el.asMap().map((key, value) => MapEntry(key.toString(), value as dynamic)));
+    } else if (el is Map) {
+      tmp[key] = parseArgs(el);
+    } else {
+      tmp[key] = el;
+    }
+  }
+
+  return tmp;
+}
+
 class PolkaTransaction extends DelegatingMap {
   final delegate = new Map<String, dynamic>();
 
@@ -62,5 +89,19 @@ class PolkaTransaction extends DelegatingMap {
     final encodedPayload =
         payloadU8a.length > 256 ? Blake2bDigest(digestSize: 32).process(payloadU8a) : Uint8List.fromList(payloadU8a);
     return Blake2bDigest(digestSize: 32).process(encodedPayload);
+  }
+
+  String get extrinsicName {
+    final pallet = this['method']['pallet'];
+    final call = this['method']['name'];
+    return '$pallet.$call';
+  }
+
+  List<String> get argNames {
+    return this['method']['args'].keys.toList();
+  }
+
+  Map<String, dynamic> get argMap {
+    return parseArgs(this['method']['args']);
   }
 }
