@@ -21,7 +21,7 @@ Map<String, dynamic> parseArgs(Map<String, dynamic> map, [Map<String, dynamic> t
     if (key == 'args') {
       tmp.addAll(parseArgs(map[key]));
       continue;
-    } else if (key == 'dest') {
+    } else if (el.values.length <= 1) {
       tmp[key] = el.values.first;
       continue;
     }
