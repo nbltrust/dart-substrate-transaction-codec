@@ -11,6 +11,14 @@ import 'package:http/http.dart' as http;
 import 'package:substrate_codec/substrate_codec.dart';
 // import 'package:sync_http/sync_http.dart';
 
+bool isSingleValueMap(dynamic el) {
+  if (!el is Map) {
+    return false;
+  }
+
+  return el.values.length == 1 && !el.values.first is Map && !el.values.first is List;
+}
+
 Map<String, dynamic> parseArgs(Map<String, dynamic> map, [Map<String, dynamic> tmp]) {
   tmp = tmp ?? new Map();
 
@@ -21,7 +29,7 @@ Map<String, dynamic> parseArgs(Map<String, dynamic> map, [Map<String, dynamic> t
     if (key == 'args') {
       tmp.addAll(parseArgs(map[key]));
       continue;
-    } else if (key == 'dest' || key == 'source') {
+    } else if (isSingleValueMap(el)) {
       tmp[key] = el.values.first;
       continue;
     }
