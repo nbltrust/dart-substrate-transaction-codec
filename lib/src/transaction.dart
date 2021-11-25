@@ -12,11 +12,11 @@ import 'package:substrate_codec/substrate_codec.dart';
 // import 'package:sync_http/sync_http.dart';
 
 bool isSingleValueMap(dynamic el) {
-  if (!el is Map) {
-    return false;
+  if (el is Map) {
+    return el.values.length == 1 && !(el.values.first is Map) && !(el.values.first is List);
   }
 
-  return el.values.length == 1 && !el.values.first is Map && !el.values.first is List;
+  return false;
 }
 
 Map<String, dynamic> parseArgs(Map<String, dynamic> map, [Map<String, dynamic> tmp]) {
@@ -56,10 +56,7 @@ class PolkaTransaction extends DelegatingMap {
       return;
     }
 
-    final result = decoded['result'];
-    this.delegate['method'] = result['method'];
-    this.delegate['tip'] = result['tip'];
-    // print(this.delegate);
+    this.delegate.addAll(decoded['result']);
   }
 
   static Future<PolkaTransaction> deserialize(String payload, [String chain = 'Westend']) async {
