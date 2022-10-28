@@ -1,8 +1,10 @@
 library substrate_codec_test.address_test;
 
+import 'dart:typed_data';
+
 import 'package:convert/convert.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:substrate_codec/substrate_codec.dart';
+import 'package:test/test.dart';
 
 const SUBKEY = [
   {
@@ -65,16 +67,17 @@ const SUBKEY = [
 
 void main() {
   SUBKEY.asMap().forEach((index, value) {
-    test("encodes with Subkey equality (${index} - ${value["ss58Format"]})", () {
-      final addr = encodeAddress(hex.decode(value["publicKey"]), value["ss58Format"]);
+    test("encodes with Subkey equality (${index} - ${value["ss58Format"]})", () async{
+      
+      final addr = await encodeAddress(Uint8List.fromList(hex.decode(value["publicKey"] as String)), value["ss58Format"] as int);
       print(addr);
 
       expect(addr, value["address"]);
     });
   });
 
-  test("publicKeyToAddress y is odd", () {
-    final addr = encodeAddress(hex.decode('4de38cd2ece2d02237534c8498610e78a4dc0db1a2c61abf1d642009636e6fbe'), 42);
+  test("publicKeyToAddress y is odd", () async{
+    final addr = await encodeAddress(Uint8List.fromList(hex.decode('4de38cd2ece2d02237534c8498610e78a4dc0db1a2c61abf1d642009636e6fbe')), 42);
     print(addr);
 
     // print(Blake2bHash.hashWithDigestSize(512, Uint8List.fromList(utf8.encode('abc'))));
@@ -85,23 +88,23 @@ void main() {
     // print(digest);
     // new Digest("Blake2b")
 
-    final addr1 = publicKeyToAddress('5ed6d1440bb1c8c79ccfe315e511b8cb4c2af011169b34fa8205bb8d5af9c426',
+    final addr1 = await publicKeyToAddress('5ed6d1440bb1c8c79ccfe315e511b8cb4c2af011169b34fa8205bb8d5af9c426',
         '0d222860186356b67f194570b45af6e1e2de7842d9edbd061c4c78d76b360f49', 42);
     print(addr1);
 
     assert(addr1 == addr);
   });
 
-  test("publicKeyToAddress y is even", () {
-    final addr = publicKeyToAddress('a282482642aaf42fb90219c3e01c9d7d2bfef54cad585ef836b38461db53d48d',
+  test("publicKeyToAddress y is even", () async{
+    final addr = await publicKeyToAddress('a282482642aaf42fb90219c3e01c9d7d2bfef54cad585ef836b38461db53d48d',
         '2900e8b6cb54a6154e38d2863b08dd0a99f7b56da31fd4872d4f691cc05851b4', 42);
     print(addr);
 
     assert('5EVDFeaCN9b7zF6jx5GRTRg5mgvEqP7yHJoptuVXhWmRcBfF' == addr);
   });
 
-  test("verify address", () {
-    final flag = verifyAddress('879b61bf2d8df8f9fb1d9e47cf47cb076e4bb5b635dfba6d595264fcd9eee1e1',
+  test("verify address", () async{
+    final flag = await verifyAddress('879b61bf2d8df8f9fb1d9e47cf47cb076e4bb5b635dfba6d595264fcd9eee1e1',
         '144od71wNviFuH7ai95DcJyG6BX6rggKVfPksfoR8nC4FMjS', 0);
     print(flag);
 

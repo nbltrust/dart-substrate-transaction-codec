@@ -14,11 +14,11 @@ class Defaults {
 }
 
 Uint8List my_hexdecode(String hexStr) {
-  return hex.decode((hexStr.length.isOdd ? '0' : '') + hexStr);
+  return Uint8List.fromList(hex.decode((hexStr.length.isOdd ? '0' : '') + hexStr));
 }
 
-Uint8List sshash(Uint8List input) {
-  final sink = blake2b.newSink();
+Future<Uint8List> sshash(Uint8List input) async{
+  final sink = Blake2b().newHashSink();
 
   // Add any number of chunks
   sink.add(hex.decode(Defaults.ss58Prefix));
@@ -26,11 +26,11 @@ Uint8List sshash(Uint8List input) {
 
   // Calculate the hash
   sink.close();
-
-  return Uint8List.fromList(sink.hash.bytes);
+  final hash = await sink.hash();
+  return Uint8List.fromList(hash.bytes);
 }
 
-String encodeAddress(Uint8List u8a, [int ss58Format = Defaults.prefix]) {
+Future<String> encodeAddress(Uint8List u8a, [int ss58Format = Defaults.prefix]) async{
   assert(ss58Format >= 0 && ss58Format <= 16383 && ![46, 47].contains(ss58Format), 'Out of range ss58Format specified');
   assert(Defaults.allowedDecodedLengths.contains(u8a.length),
       "Expected a valid key to convert, with length ${Defaults.allowedDecodedLengths}");
@@ -64,7 +64,8 @@ String encodeAddress(Uint8List u8a, [int ss58Format = Defaults.prefix]) {
   // );
   bytesBuilder = BytesBuilder();
   bytesBuilder.add(input);
-  bytesBuilder.add(sshash(input).sublist(0, [32, 33].contains(u8a.length) ? 2 : 1));
+  final r =  await sshash(input);
+  bytesBuilder.add(r.sublist(0, [32, 33].contains(u8a.length) ? 2 : 1));
   final bytes = bytesBuilder.toBytes();
 
   return base58.encode(bytes);
@@ -75,7 +76,7 @@ Uint8List blake2AsU8a(Uint8List data, {int bitLength = 256}) {
   return Blake2bDigest(digestSize: digestSize).process(data);
 }
 
-String publicKeyToAddress(String hexX, String hexY, [int ss58Format = Defaults.prefix]) {
+Future<String> publicKeyToAddress(String hexX, String hexY, [int ss58Format = Defaults.prefix]) async{
   final y = BigInt.parse(hexY, radix: 16);
   final compressedKey = (y.isEven ? [2] : [3]) + my_hexdecode(hexX);
 
@@ -84,16 +85,17 @@ String publicKeyToAddress(String hexX, String hexY, [int ss58Format = Defaults.p
   final publicKeyU8A = blake2AsU8a(Uint8List.fromList(compressedKey));
   // print('publicKeyU8A: $publicKeyU8A');
 
-  return encodeAddress(publicKeyU8A, ss58Format);
+  return await encodeAddress(publicKeyU8A, ss58Format);
 }
 
-bool verifyAddress(String pubkey, String address, [int ss58Format = Defaults.prefix]) {
+Future<bool> verifyAddress(String pubkey, String address, [int ss58Format = Defaults.prefix]) async{
   pubkey = strip0x(pubkey);
 
   if (pubkey.length <= 64) {
     try {
       final publicKeyU8A = my_hexdecode(pubkey);
-      if (encodeAddress(publicKeyU8A, ss58Format) == address) return true;
+      final addr = await encodeAddress(publicKeyU8A, ss58Format);
+      if (addr == address) return true;
     } catch (e) {
       //
     }
@@ -101,7 +103,8 @@ bool verifyAddress(String pubkey, String address, [int ss58Format = Defaults.pre
     try {
       final compressedKey = [2] + my_hexdecode(pubkey);
       final publicKeyU8A = blake2AsU8a(Uint8List.fromList(compressedKey));
-      if (encodeAddress(publicKeyU8A, ss58Format) == address) return true;
+      final addr = await encodeAddress(publicKeyU8A, ss58Format);
+      if (addr == address) return true;
     } catch (e) {
       //
     }
@@ -109,13 +112,15 @@ bool verifyAddress(String pubkey, String address, [int ss58Format = Defaults.pre
     try {
       final compressedKey = [3] + my_hexdecode(pubkey);
       final publicKeyU8A = blake2AsU8a(Uint8List.fromList(compressedKey));
-      return encodeAddress(publicKeyU8A, ss58Format) == address;
+      final addr = await encodeAddress(publicKeyU8A, ss58Format);
+      return addr == address;
     } catch (e) {
       //
     }
   } else {
     try {
-      return publicKeyToAddress(pubkey.substring(0, 64), pubkey.substring(64), ss58Format) == address;
+      final pka = await publicKeyToAddress(pubkey.substring(0, 64), pubkey.substring(64), ss58Format);
+      return pka == address;
     } catch (e) {
       //
     }

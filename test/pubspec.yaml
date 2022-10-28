@@ -5,10 +5,7 @@ publish_to: none
 dependencies:
   substrate_codec:
     path: ../
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
+  test: any
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.17.0 <3.0.0"

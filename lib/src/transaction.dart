@@ -19,7 +19,7 @@ bool isSingleValueMap(dynamic el) {
   return false;
 }
 
-Map<String, dynamic> parseArgs(Map<String, dynamic> map, [Map<String, dynamic> tmp]) {
+Map<String, dynamic> parseArgs(Map<dynamic, dynamic> map, [Map<String, dynamic>? tmp]) {
   tmp = tmp ?? new Map();
 
   final keys = map.keys;
@@ -61,7 +61,7 @@ class PolkaTransaction extends DelegatingMap {
 
   static Future<PolkaTransaction> deserialize(String payload, [String chain = 'Westend']) async {
     final response = await http.post(
-      'http://localhost:3578/substrate/decode',
+      Uri.http('localhost:3578', '/substrate/decode'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -92,7 +92,7 @@ class PolkaTransaction extends DelegatingMap {
   Uint8List hashToSign() {
     final payloadU8a = hex.decode(strip0x(this['payload']).substring(2));
     final encodedPayload =
-        payloadU8a.length > 256 ? Blake2bDigest(digestSize: 32).process(payloadU8a) : Uint8List.fromList(payloadU8a);
+        payloadU8a.length > 256 ? Blake2bDigest(digestSize: 32).process(Uint8List.fromList(payloadU8a)) : Uint8List.fromList(payloadU8a);
     return Blake2bDigest(digestSize: 32).process(encodedPayload);
   }
 
